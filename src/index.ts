@@ -14,13 +14,13 @@ const program = new Command();
 
 program
   .name("handover-doc")
-  .description("Genera documentazione automatica per passaggio di consegne di progetti software")
+  .description("Generates automatic documentation for software project handovers.")
   .version("1.0.0");
 
 program
   .command("generate")
-  .description("Genera la documentazione del progetto")
-  .option("-c, --config <path>", "Percorso del file di configurazione", "./config.json")
+  .description("Generates project documentation")
+  .option("-c, --config <path>", "Path to the configuration file", "./config.json")
   .action(async (options) => {
     try {
       
@@ -128,8 +128,8 @@ program
 
 program
   .command("init")
-  .description("Crea un file di configurazione di esempio")
-  .option("-o, --output <path>", "Percorso del file di configurazione", "./config.json")
+  .description("Creates an example configuration file")
+  .option("-o, --output <path>", "Path to the configuration file", "./config.json")
   .action(async (options) => {
     try {
       const configPath = resolve(options.output);
