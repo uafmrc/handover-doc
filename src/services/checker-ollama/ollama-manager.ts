@@ -1,50 +1,37 @@
-import { Ollama, Message } from 'ollama';
+import { Ollama } from 'ollama';
 import { OllamaInstaller } from './installer';
-
-export interface OllamaConfig {
-  model?: string;
-  host?: string;
-  autoInstall?: boolean;
-}
+import { i18n } from '../i18n.service';
+import { OllamaConfig } from '../../models/ollama.model';
+import { IConfig } from '../../models/config.model';
 
 export class OllamaChecker {
   private readonly client: Ollama;
   private readonly installer: OllamaInstaller;
-  private model: string;
-  private conversationHistory: Message[] = [];
+  private readonly model: string;
   private initialized: boolean = false;
 
-  constructor(config: OllamaConfig = {}) {
+  constructor(configProject:IConfig, config: OllamaConfig = {}) {
     this.model = config.model || 'llama2';
     this.client = new Ollama({ host: config.host || 'http://localhost:11434' });
-    this.installer = new OllamaInstaller();
+    this.installer = new OllamaInstaller(configProject);
   }
 
-  async initialize(): Promise<void> {
+  async initialize(config:IConfig): Promise<void> {
     if (this.initialized) return;
     
     try {
       await this.installer.checkAndSetup();
       await this.installer.ensureModelExists(this.model);
       this.initialized = true;
-      console.log('✅ Tutto pronto!\n');
+      console.log(i18n.t('cli.ollama.ready'));
     } catch (error) {
-      throw new Error(`Inizializzazione fallita: ${error}`);
+      throw new Error(i18n.t('cli.ollama.initFailed', { error }));
     }
-  }
-
-  clearHistory(): void {
-    this.conversationHistory = [];
   }
 
   async listAvailableModels(): Promise<string[]> {
     const response = await this.client.list();
     return response.models.map(m => m.name);
-  }
-
-  changeModel(modelName: string): void {
-    this.model = modelName;
-    this.clearHistory();
   }
 
   shutdown(): void {

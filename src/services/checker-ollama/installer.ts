@@ -1,39 +1,39 @@
 import { exec, spawn, ChildProcess } from 'node:child_process';
 import { promisify } from 'node:util';
-import { 
-  checkOllamaInstalled, 
-  isOllamaServerRunning, 
-  getInstallInstructions,
-  getOllamaVersion,
-  sleep
-} from './utils';
+import { checkOllamaInstalled, isOllamaServerRunning, getInstallInstructions, getOllamaVersion, sleep } from './utils';
+import { i18n } from '../i18n.service';
+import { IConfig } from '../../models/config.model';
 
 const execAsync = promisify(exec);
 
 export class OllamaInstaller {
   private serverProcess: ChildProcess | null = null;
+  private readonly config: IConfig;
+
+  constructor(config: IConfig) {
+    this.config = config;
+  }
 
   async checkAndSetup(): Promise<void> {
-    console.log('🔍 Controllo installazione Ollama...');
+    console.log(i18n.t('cli.ollama.checking'));
     
     const isInstalled = await checkOllamaInstalled();
     
     if (!isInstalled) {
-      console.error(getInstallInstructions());
-      throw new Error('Ollama non è installato. Segui le istruzioni sopra.');
+      console.error(getInstallInstructions(this.config));
+      throw new Error(i18n.t('cli.ollama.notInstalled'));
     }
 
     const version = await getOllamaVersion();
-    console.log(`✅ Ollama installato: ${version}`);
+    console.log(i18n.t('cli.ollama.installed', { version }));
     
-    // Controlla se il server è già in esecuzione
-    const isRunning = await isOllamaServerRunning();
+    const isRunning = await isOllamaServerRunning(this.config);
     
-    if (!isRunning) {
-      console.log('🚀 Avvio del server Ollama...');
-      await this.startServer();
+    if (isRunning) {
+      console.log(i18n.t('cli.ollama.serverRunning'));
     } else {
-      console.log('✅ Server Ollama già in esecuzione');
+      console.log(i18n.t('cli.ollama.startingServer'));
+      await this.startServer();
     }
   }
 
@@ -45,13 +45,13 @@ export class OllamaInstaller {
       });
 
       this.serverProcess.on('error', (error) => {
-        reject(new Error(`Impossibile avviare il server Ollama: ${error.message}`));
+        reject(new Error(i18n.t('cli.ollama.startError', { error: error.message })));
       });
 
       // Aspetta che il server sia pronto
       this.waitForServerReady()
         .then(() => {
-          console.log('✅ Server Ollama avviato con successo');
+          console.log(i18n.t('cli.ollama.serverStarted'));
           resolve();
         })
         .catch(reject);
@@ -60,34 +60,34 @@ export class OllamaInstaller {
 
   private async waitForServerReady(maxAttempts: number = 30): Promise<void> {
     for (let i = 0; i < maxAttempts; i++) {
-      const isRunning = await isOllamaServerRunning();
+      const isRunning = await isOllamaServerRunning(this.config);
       if (isRunning) {
         return;
       }
       await sleep(1000);
     }
-    throw new Error('Timeout: il server Ollama non si è avviato in tempo');
+    throw new Error(i18n.t('cli.ollama.serverTimeout'));
   }
 
   async ensureModelExists(modelName: string): Promise<void> {
-    console.log(`🔍 Controllo se il modello "${modelName}" è disponibile...`);
+    console.log(i18n.t('cli.ollama.checkingModel', { model: modelName }));
     
     try {
       const { stdout } = await execAsync('ollama list');
       
       if (stdout.includes(modelName)) {
-        console.log(`✅ Modello "${modelName}" già disponibile`);
+        console.log(i18n.t('cli.ollama.modelAvailable', { model: modelName }));
         return;
       }
 
-      console.log(`📥 Download del modello "${modelName}" in corso...`);
-      console.log('⚠️  Questo potrebbe richiedere diversi minuti...');
+      console.log(i18n.t('cli.ollama.downloadingModel', { model: modelName }));
+      console.log(i18n.t('cli.ollama.downloadWarning'));
       
       await execAsync(`ollama pull ${modelName}`);
-      console.log(`✅ Modello "${modelName}" scaricato con successo`);
+      console.log(i18n.t('cli.ollama.modelDownloaded', { model: modelName }));
       
     } catch (error) {
-      throw new Error(`Errore durante il download del modello: ${error}`);
+      throw new Error(i18n.t('cli.ollama.downloadError', { error }));
     }
   }
 
@@ -95,7 +95,7 @@ export class OllamaInstaller {
     if (this.serverProcess) {
       this.serverProcess.kill();
       this.serverProcess = null;
-      console.log('🛑 Server Ollama fermato');
+      console.log(i18n.t('cli.ollama.serverStopped'));
     }
   }
 }

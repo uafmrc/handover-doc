@@ -4,12 +4,14 @@ import { StringOutputParser } from "@langchain/core/output_parsers";
 import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
 import { ChatOllama } from '@langchain/ollama';
 import { ChatOpenAI } from '@langchain/openai';
-import { OllamaChecker } from './checker-ollama/ollama-manager';
 import { PROMPT_CODE_SNIPPET, PROMPT_SUMMARY } from '../helpers/prompt.helpers';
 import { BrainModel, BrainType, BrainTypeEnum } from '../models/brain.model';
 import { IConfig } from '../models/config.model';
 import { IFileAnalysis } from '../models/file-analysis.model';
 import { ILLMAnalysis } from '../models/llm-analysis.model';
+import { DEFAULT_OLLAMA_MODEL } from '../models/ollama.model';
+import { OllamaChecker } from './checker-ollama/ollama-manager';
+import { i18n } from './i18n.service';
 
 export class BrainService {
     private readonly brain:BrainModel;
@@ -25,12 +27,12 @@ export class BrainService {
         this.outputLanguage = config.languageDoc.toLowerCase().startsWith('it') ? 'Italian' : 'English';
         this.baseUrl = config.llmBaseUrl;
         if(!config.llmModel) {
-            throw new Error('Invalid LLM model');
+            throw new Error(i18n.t('brain.invalidModel'));
         }
 
         const new_brain = this.loadType(config.llmProvider);
         if(!new_brain) {
-            throw new Error('Invalid LLM type');
+            throw new Error(i18n.t('brain.invalidType'));
         }
         this.brain = new_brain;
     }
@@ -44,7 +46,7 @@ export class BrainService {
             const response = await this.brain.pipe(new StringOutputParser()).invoke([new HumanMessage(prompt)]);
             return this.parseAnalysisResponse(response, file.relativePath);
         } catch (error) {
-            console.error(`Error analyzing file with Claude: ${file.relativePath}`, error);
+            console.error(i18n.t('brain.analyzeError', { path: file.relativePath }), error);
             return this.getFallbackAnalysis(file);
         }
     }
@@ -55,10 +57,10 @@ export class BrainService {
         try {
             this.brain.temperature = .5;
             const response = await this.brain.pipe(new StringOutputParser()).invoke([new HumanMessage(prompt)]);
-            return response ?? 'Sommario non disponibile';
+            return response ?? i18n.t('brain.summaryNotAvailable');
         } catch (error) {
-            console.error('Error generating project summary:', error);
-            return 'Sommario non disponibile a causa di un errore nell\'analisi.';
+            console.error(i18n.t('brain.genSummaryError'), error);
+            return i18n.t('brain.genSummaryErrorMsg');
         }
     }
 
@@ -82,14 +84,14 @@ export class BrainService {
         return analyses;
     }
 
-    async checkHealth(): Promise<boolean> {
+    async checkHealth(config:IConfig): Promise<boolean> {
         try {
             if(!(this.brain instanceof ChatOllama)) return true;
-            const ollama = new OllamaChecker({ model: this.model ?? 'qwen2.5-coder:7b' });
-            await ollama.initialize();
+            const ollama = new OllamaChecker(config, { model: this.model ?? DEFAULT_OLLAMA_MODEL });
+            await ollama.initialize(config);
             const response = await fetch(`${this.baseUrl}/api/tags`);
             return response.ok;
-        } catch (error) {
+        } catch {
             return false;
         }
     }
@@ -97,31 +99,31 @@ export class BrainService {
 
     private parseAnalysisResponse(response: string, filePath: string): ILLMAnalysis {
         try {
-            const jsonMatch = response.match(/\{[\s\S]*\}/);
+            const jsonMatch = /\{[\s\S]*\}/.exec(response);
             if (jsonMatch) {
                 const parsed = JSON.parse(jsonMatch[0]);
                 return {
                     filePath,
-                    summary: parsed.summary || 'Analisi non disponibile',
-                    purpose: parsed.purpose || 'Scopo non determinato',
+                    summary: parsed.summary || i18n.t('brain.analysisNotAvailable'),
+                    purpose: parsed.purpose || i18n.t('brain.purposeNotDetermined'),
                     keyFunctions: parsed.keyFunctions || [],
                     improvements: parsed.improvements || [],
-                    dependencies: parsed.dependencies || 'Nessuna dipendenza rilevata',
+                    dependencies: parsed.dependencies || i18n.t('brain.noDependencies'),
                     complexity: parsed.complexity || 'medium',
                     qualityScore: typeof parsed.qualityScore === 'number' ? parsed.qualityScore : 7
                 };
             }
         } catch (error) {
-            console.error('Error parsing Claude response:', error);
+            console.error(i18n.t('brain.parseError'), error);
         }
 
         return {
             filePath,
             summary: response.substring(0, 200),
-            purpose: 'Analisi automatica non disponibile',
+            purpose: i18n.t('brain.autoAnalysisNotAvailable'),
             keyFunctions: [],
             improvements: [],
-            dependencies: 'Non analizzato',
+            dependencies: i18n.t('brain.notAnalyzed'),
             complexity: 'medium'
         };
     }
@@ -129,15 +131,22 @@ export class BrainService {
     private getFallbackAnalysis(file: IFileAnalysis): ILLMAnalysis {
         return {
             filePath: file.relativePath,
-            summary: `File ${file.language} con ${file.functions.length} funzioni e ${file.classes.length} classi.`,
-            purpose: 'Analisi automatica non disponibile',
+            summary: i18n.t('brain.fallbackSummary', { 
+                language: file.language, 
+                functions: file.functions.length, 
+                classes: file.classes.length 
+            }),
+            purpose: i18n.t('brain.autoAnalysisNotAvailable'),
             keyFunctions: file.functions.slice(0, 3).map(f => ({
                 name: f.name,
-                explanation: `Funzione ${f.isAsync ? 'asincrona' : 'sincrona'} con ${f.params.length} parametri`,
-                usage: 'Da documentare manualmente'
+                explanation: i18n.t('brain.functionExplanation', { 
+                    type: f.isAsync ? i18n.t('brain.async') : i18n.t('brain.sync'),
+                    params: f.params.length
+                }),
+                usage: i18n.t('brain.manualDoc')
             })),
-            improvements: ['Analisi completa non disponibile - verificare manualmente'],
-            dependencies: 'Non analizzato',
+            improvements: [i18n.t('brain.fullAnalysisNotAvailable')],
+            dependencies: i18n.t('brain.notAnalyzed'),
             complexity: 'medium'
         };
     }

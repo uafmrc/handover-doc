@@ -120,6 +120,30 @@ export const translations = {
         chartFilesNumber: "Numero File",
         chartFilesScore: "File per Punteggio",
         chartScoreLabel: "Punteggio (1-10)",
+        purpose: "Scopo",
+        low: "Basso",
+        medium: "Medio",
+        high: "Alto"
+      },
+      brain: {
+        invalidModel: "Modello LLM non valido",
+        invalidType: "Tipo LLM non valido",
+        analyzeError: "Errore durante l'analisi del file con l'IA: {{path}}",
+        summaryNotAvailable: "Sommario non disponibile",
+        genSummaryError: "Errore durante la generazione del sommario del progetto:",
+        genSummaryErrorMsg: "Sommario non disponibile a causa di un errore nell'analisi.",
+        analysisNotAvailable: "Analisi non disponibile",
+        purposeNotDetermined: "Scopo non determinato",
+        noDependencies: "Nessuna dipendenza rilevata",
+        parseError: "Errore durante il parsing della risposta dell'IA:",
+        autoAnalysisNotAvailable: "Analisi automatica non disponibile",
+        notAnalyzed: "Non analizzato",
+        fallbackSummary: "File {{language}} con {{functions}} funzioni e {{classes}} classi.",
+        async: "asincrona",
+        sync: "sincrona",
+        functionExplanation: "Funzione {{type}} con {{params}} parametri",
+        manualDoc: "Da documentare manualmente",
+        fullAnalysisNotAvailable: "Analisi completa non disponibile - verificare manualmente"
       },
       cli: {
         start: "🚀 Avvio generazione documentazione...\n",
@@ -155,7 +179,31 @@ export const translations = {
         initNextSteps: "\n💡 Prossimi passi:",
         initStep1: "   1. Modifica il file config.json con i tuoi parametri",
         initStep2: "   2. Esegui: handover-doc generate",
-        initError: "❌ Errore durante la creazione del file: {{message}}"
+        initError: "❌ Errore durante la creazione del file: {{message}}",
+        ollama: {
+          checking: "🔍 Controllo installazione Ollama...",
+          notInstalled: "Ollama non è installato. Segui le istruzioni sopra.",
+          installed: "✅ Ollama installato: {{version}}",
+          startingServer: "🚀 Avvio del server Ollama...",
+          serverRunning: "✅ Server Ollama già in esecuzione",
+          serverStarted: "✅ Server Ollama avviato con successo",
+          serverTimeout: "Timeout: il server Ollama non si è avviato in tempo",
+          startError: "Impossibile avviare il server Ollama: {{error}}",
+          checkingModel: "🔍 Controllo se il modello \"{{model}}\" è disponibile...",
+          modelAvailable: "✅ Modello \"{{model}}\" già disponibile",
+          downloadingModel: "📥 Download del modello \"{{model}}\" in corso...",
+          downloadWarning: "⚠️  Questo potrebbe richiedere diversi minuti...",
+          modelDownloaded: "✅ Modello \"{{model}}\" scaricato con successo",
+          downloadError: "Errore durante il download del modello: {{error}}",
+          serverStopped: "🛑 Server Ollama fermato",
+          ready: "✅ Tutto pronto!\n",
+          initFailed: "Inizializzazione fallita: {{error}}",
+          instructions: {
+            darwin: "\n╔════════════════════════════════════════════════════════════╗\n║  Ollama non è installato sul tuo sistema                   ║\n╚════════════════════════════════════════════════════════════╝\n\nPer installare Ollama su macOS:\n\n1. Vai su: https://ollama.ai/download\n2. Scarica l'installer per macOS\n3. Oppure usa Homebrew:\n   brew install ollama\n\n4. Dopo l'installazione, avvia Ollama:\n   ollama serve\n\nRiprova dopo l'installazione.\n",
+            linux: "\n╔════════════════════════════════════════════════════════════╗\n║  Ollama non è installato sul tuo sistema                   ║\n╚════════════════════════════════════════════════════════════╝\n\nPer installare Ollama su Linux:\n\ncurl -fsSL https://ollama.ai/install.sh | sh\n\nDopo l'installazione, avvia Ollama:\nollama serve\n\nRiprova dopo l'installazione.\n",
+            win32: "\n╔════════════════════════════════════════════════════════════╗\n║  Ollama non è installato sul tuo sistema                   ║\n╚════════════════════════════════════════════════════════════╝\n\nPer installare Ollama su Windows:\n\n1. Vai su: https://ollama.ai/download\n2. Scarica l'installer per Windows\n3. Esegui il file .exe e segui le istruzioni\n\n4. Dopo l'installazione, Ollama si avvierà automaticamente\n\nRiprova dopo l'installazione.\n"
+          }
+        }
       },
       debug: {
         title: "🔍 DEBUG - Rilevamento File con Path Profonde\n",
@@ -298,6 +346,30 @@ export const translations = {
         chartFilesNumber: "Number of Files",
         chartFilesScore: "Files per Score",
         chartScoreLabel: "Score (1-10)",
+        purpose: "Purpose",
+        low: "Low",
+        medium: "Medium",
+        high: "High"
+      },
+      brain: {
+        invalidModel: "Invalid LLM model",
+        invalidType: "Invalid LLM type",
+        analyzeError: "Error analyzing file with AI: {{path}}",
+        summaryNotAvailable: "Summary not available",
+        genSummaryError: "Error generating project summary:",
+        genSummaryErrorMsg: "Summary not available due to an analysis error.",
+        analysisNotAvailable: "Analysis not available",
+        purposeNotDetermined: "Purpose not determined",
+        noDependencies: "No dependencies detected",
+        parseError: "Error parsing AI response:",
+        autoAnalysisNotAvailable: "Automatic analysis not available",
+        notAnalyzed: "Not analyzed",
+        fallbackSummary: "{{language}} file with {{functions}} functions and {{classes}} classes.",
+        async: "async",
+        sync: "sync",
+        functionExplanation: "{{type}} function with {{params}} parameters",
+        manualDoc: "To be documented manually",
+        fullAnalysisNotAvailable: "Full analysis not available - verify manually"
       },
       cli: {
         start: "🚀 Starting documentation generation...\n",
@@ -333,7 +405,31 @@ export const translations = {
         initNextSteps: "\n💡 Next steps:",
         initStep1: "   1. Edit config.json with your parameters",
         initStep2: "   2. Run: handover-doc generate",
-        initError: "❌ Error during file creation: {{message}}"
+        initError: "❌ Error during file creation: {{message}}",
+        ollama: {
+          checking: "🔍 Checking Ollama installation...",
+          notInstalled: "Ollama is not installed. Follow the instructions above.",
+          installed: "✅ Ollama installed: {{version}}",
+          startingServer: "🚀 Starting Ollama server...",
+          serverRunning: "✅ Ollama server already running",
+          serverStarted: "✅ Ollama server started successfully",
+          serverTimeout: "Timeout: Ollama server did not start in time",
+          startError: "Could not start Ollama server: {{error}}",
+          checkingModel: "🔍 Checking if model \"{{model}}\" is available...",
+          modelAvailable: "✅ Model \"{{model}}\" already available",
+          downloadingModel: "📥 Downloading model \"{{model}}\"...",
+          downloadWarning: "⚠️  This may take several minutes...",
+          modelDownloaded: "✅ Model \"{{model}}\" downloaded successfully",
+          downloadError: "Error downloading model: {{error}}",
+          serverStopped: "🛑 Ollama server stopped",
+          ready: "✅ Everything ready!\n",
+          initFailed: "Initialization failed: {{error}}",
+          instructions: {
+            darwin: "\n╔════════════════════════════════════════════════════════════╗\n║  Ollama is not installed on your system                    ║\n╚════════════════════════════════════════════════════════════╝\n\nTo install Ollama on macOS:\n\n1. Go to: https://ollama.ai/download\n2. Download the macOS installer\n3. Or use Homebrew:\n   brew install ollama\n\n4. After installation, start Ollama:\n   ollama serve\n\nTry again after installation.\n",
+            linux: "\n╔════════════════════════════════════════════════════════════╗\n║  Ollama is not installed on your system                    ║\n╚════════════════════════════════════════════════════════════╝\n\nTo install Ollama on Linux:\n\ncurl -fsSL https://ollama.ai/install.sh | sh\n\nAfter installation, start Ollama:\nollama serve\n\nTry again after installation.\n",
+            win32: "\n╔════════════════════════════════════════════════════════════╗\n║  Ollama is not installed on your system                    ║\n╚════════════════════════════════════════════════════════════╝\n\nTo install Ollama on Windows:\n\n1. Go to: https://ollama.ai/download\n2. Download the Windows installer\n3. Run the .exe file and follow instructions\n\n4. After installation, Ollama will start automatically\n\nTry again after installation.\n"
+          }
+        }
       },
       debug: {
         title: "🔍 DEBUG - File Detection with Deep Paths\n",

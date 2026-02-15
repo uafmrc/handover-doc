@@ -49,7 +49,7 @@ program
       console.log(i18n.t("cli.phase2"));
 
       const brain = new BrainService(config);
-      const isHealthy = await brain.checkHealth();
+      const isHealthy = await brain.checkHealth(config);
 
       if(!isHealthy) {
         console.error(i18n.t("cli.brainError"));

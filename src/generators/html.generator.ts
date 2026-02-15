@@ -34,15 +34,10 @@ export class HtmlGenerator {
       await this.initialize();
     }
 
-    const functionsCount = projectAnalysis.files.reduce(
-      (sum, file) => sum + file.functions.length,
-      0,
-    );
+    const functionsCount = projectAnalysis.files.reduce((sum, file) => sum + file.functions.length,0);
 
     const fileAnalysesData = llmAnalyses.map((analysis) => {
-      const fileData = projectAnalysis.files.find(
-        (f) => f.relativePath === analysis.filePath,
-      );
+      const fileData = projectAnalysis.files.find((f) => f.relativePath === analysis.filePath);
 
       return {
         filePath: analysis.filePath,
@@ -68,25 +63,20 @@ export class HtmlGenerator {
       return acc;
     }, {} as Record<number, number>);
 
-    // Calcolo Technical Debt
     let techDebtScore = 0;
     
-    // Punti per complessità
     fileAnalysesData.forEach(f => {
       if (f.complexity === 'high') techDebtScore += 5;
       else if (f.complexity === 'medium') techDebtScore += 3;
       else techDebtScore += 1;
     });
 
-    // Punti per TODOs
     techDebtScore += (projectAnalysis.todos?.length || 0) * 2;
-
-    // Normalizzazione (0-100 per semplicità di visualizzazione, ma può andare oltre)
-    const techDebtLevel = techDebtScore < 50 ? 'Low' : techDebtScore < 150 ? 'Medium' : 'High';
+    const techDebtLevel = this.getTechDebtLevel(techDebtScore);
 
     const data = {
       projectName: projectAnalysis.projectName,
-      generatedDate: new Date().toLocaleDateString("it-IT", {
+      generatedDate: new Date().toLocaleDateString(i18n.getLocale(), {
         year: "numeric",
         month: "long",
         day: "numeric",
@@ -127,6 +117,16 @@ export class HtmlGenerator {
     };
 
     return this.template!(data);
+  }
+
+  private getTechDebtLevel(score: number): string {
+    if (score < 50) {
+      return i18n.t('html.low');
+    } else if (score < 150) {
+      return i18n.t('html.medium');
+    } else {
+      return i18n.t('html.high');
+    }
   }
 
   private buildFileTree(files: { relativePath: string; size: number }[]): any {

@@ -1,15 +1,11 @@
 import { exec } from 'node:child_process';
 import { arch, platform } from 'node:os';
 import { promisify } from 'node:util';
+import { SystemInfo } from '../../models/ollama.model';
+import { IConfig } from '../../models/config.model';
+import { i18n } from '../i18n.service';
 
 const execAsync = promisify(exec);
-
-export interface SystemInfo {
-  platform: NodeJS.Platform;
-  arch: string;
-  isOllamaInstalled: boolean;
-  ollamaVersion?: string;
-}
 
 export async function checkOllamaInstalled(): Promise<boolean> {
   try {
@@ -29,9 +25,9 @@ export async function getOllamaVersion(): Promise<string | null> {
   }
 }
 
-export async function isOllamaServerRunning(): Promise<boolean> {
+export async function isOllamaServerRunning(config:IConfig): Promise<boolean> {
   try {
-    const response = await fetch('http://localhost:11434/api/tags');
+    const response = await fetch(`${config.llmBaseUrl}/api/tags`);
     return response.ok;
   } catch {
     return false;
@@ -45,59 +41,16 @@ export function getSystemInfo(): Pick<SystemInfo, 'platform' | 'arch'> {
   };
 }
 
-export function getInstallInstructions(): string {
+export function getInstallInstructions(config:IConfig): string {
   const current_platform = platform();
-  
-  const instructions: Record<string, string> = {
-    darwin: `
-╔════════════════════════════════════════════════════════════╗
-║  Ollama non è installato sul tuo sistema                   ║
-╚════════════════════════════════════════════════════════════╝
-
-Per installare Ollama su macOS:
-
-1. Vai su: https://ollama.ai/download
-2. Scarica l'installer per macOS
-3. Oppure usa Homebrew:
-   brew install ollama
-
-4. Dopo l'installazione, avvia Ollama:
-   ollama serve
-
-Riprova dopo l'installazione.
-    `,
-    linux: `
-╔════════════════════════════════════════════════════════════╗
-║  Ollama non è installato sul tuo sistema                   ║
-╚════════════════════════════════════════════════════════════╝
-
-Per installare Ollama su Linux:
-
-curl -fsSL https://ollama.ai/install.sh | sh
-
-Dopo l'installazione, avvia Ollama:
-ollama serve
-
-Riprova dopo l'installazione.
-    `,
-    win32: `
-╔════════════════════════════════════════════════════════════╗
-║  Ollama non è installato sul tuo sistema                   ║
-╚════════════════════════════════════════════════════════════╝
-
-Per installare Ollama su Windows:
-
-1. Vai su: https://ollama.ai/download
-2. Scarica l'installer per Windows
-3. Esegui il file .exe e segui le istruzioni
-
-4. Dopo l'installazione, Ollama si avvierà automaticamente
-
-Riprova dopo l'installazione.
-    `
-  };
-
-  return instructions[current_platform] || instructions.linux;
+  const instructionKey = `cli.ollama.instructions.${current_platform}`;
+  const fallbackKey = `cli.ollama.instructions.linux`;
+  const instruction = i18n.t(instructionKey);
+  if (instruction === instructionKey) {
+    return i18n.t(fallbackKey);
+  } else {
+    return instruction;
+  }
 }
 
 export async function sleep(ms: number): Promise<void> {
