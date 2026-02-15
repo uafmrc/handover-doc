@@ -9,7 +9,7 @@ import { BrainModel, BrainType, BrainTypeEnum } from '../models/brain.model';
 import { IConfig } from '../models/config.model';
 import { IFileAnalysis } from '../models/file-analysis.model';
 import { ILLMAnalysis } from '../models/llm-analysis.model';
-import { DEFAULT_OLLAMA_MODEL } from '../models/ollama.model';
+import { DEFAULT_OLLAMA_HOST, DEFAULT_OLLAMA_MODEL } from '../models/ollama.model';
 import { OllamaChecker } from './checker-ollama/ollama-manager';
 import { i18n } from './i18n.service';
 
@@ -176,7 +176,7 @@ export class BrainService {
                 return new ChatOllama({
                     streaming: false,
                     model: this.model,
-                    baseUrl: this.baseUrl ?? 'http://localhost:11434',
+                    baseUrl: this.baseUrl ?? DEFAULT_OLLAMA_HOST,
                     temperature: .3,
                     topP: .9
                 });
