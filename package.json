@@ -1,0 +1,57 @@
+{
+  "name": "handover-doc",
+  "version": "1.0.0",
+  "description": "Automated project handover documentation generator using LLM",
+  "author": "Marco Lattanzi",
+  "license": "SEE LICENSE IN LICENSE",
+  "main": "dist/index.js",
+  "bin": {
+    "handover-doc": "./dist/index.js"
+  },
+  "scripts": {
+    "clean": "rimraf dist",
+    "copy-templates": "copyfiles -u 1 \"src/templates/**/*\" dist",
+    "prebuild": "npm run clean",
+    "build": "tsc && npm run copy-templates",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts",
+    "watch": "nodemon --exec ts-node src/index.ts",
+    "dev:generate": "ts-node src/index.ts generate",
+    "watch:generate": "nodemon --exec ts-node src/index.ts generate",
+    "debug": "nodemon --inspect --exec ts-node src/index.ts generate",
+    "debug:paths": "ts-node debug-paths.ts"
+  },
+  "keywords": [
+    "documentation",
+    "handover",
+    "llm",
+    "code-analysis"
+  ],
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.30.1",
+    "@langchain/anthropic": "^1.3.17",
+    "@langchain/core": "^1.1.24",
+    "@langchain/google-genai": "^2.1.18",
+    "@langchain/ollama": "^1.2.2",
+    "@langchain/openai": "^1.2.7",
+    "@typescript-eslint/parser": "^6.21.0",
+    "build": "^0.1.4",
+    "commander": "^11.1.0",
+    "glob": "^10.3.10",
+    "handlebars": "^4.7.8",
+    "highlight.js": "^11.9.0",
+    "i18next": "^25.8.7",
+    "marked": "^11.1.1",
+    "ollama": "^0.6.3",
+    "ora": "^8.0.1",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.5",
+    "copyfiles": "^2.4.1",
+    "nodemon": "^3.0.2",
+    "rimraf": "^6.1.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  }
+}
